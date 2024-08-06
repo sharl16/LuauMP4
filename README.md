@@ -1,4 +1,5 @@
-# A simple python script that slices mp4 videos into png peices using OpenCV + the Plugin
+# This is just source code so I don't get in trouble
 
-This is just the video slicer for LuauMP4 (And the plugin). If you are looking for the ModuleScript contact me at @sharl16
-The Plugin is also available at: https://create.roblox.com/store/asset/18735535757
+A simple python script that slices .mp4 footage in .png files.
+
+- The Plugin (Module comes with the plugin) is available at: https://create.roblox.com/store/asset/18735535757, or you can just use it locally by extracting it from here

@@ -8,3 +8,4 @@ A simple python script that slices .mp4 footage in .png files.
 ## Goals:
 - Make a "algorithm" in which Python detects duplicate or similar frames, combines them all in one and then via a config file it tells Lua to wait a set amount of time when on that frame. This will drastically decrease the image count and the size.
 - Find a way to "stream" images rather than uploading massive amounts of images in Roblox manually.
+- Implement "Lazy Loading" when playing back images.

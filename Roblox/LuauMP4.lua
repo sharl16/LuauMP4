@@ -1,9 +1,18 @@
 --[[
 
 ==================
-LuauMP4 // Version b1.0
+LuauMP4 // Version b1.1
 by @sharl16
 ==================
+
+!!!COMPLETE REWRITE!!! 
+
+The previous versions had some weird code due to
+using GPT for some stuff (Like removing the video
+at the end and ect. ) This caused more problems
+when trying to debug and I had to rewrite it all 
+completely without GPT (Obviously, the approach is the same,
+so it is similar, it just doesn't have weird artifacts from GPT.)
 
 This is the main module for playing back videos from ImageLabels. 
 It is not recommended to touch anything in here unless you know 
@@ -14,132 +23,108 @@ modifying this code directly. Updates will come.
 
 ]]
 
-local LuauMP4 = {} 
+local LuauMP4 = {}
 
--- Services
 local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local isFinished = false -- We use this to keep the loop running unless it is true.
+local plr = Players.LocalPlayer
+local isFinished = false
 
-warn("(b.1.0) This Experience uses LuauMP4 by @sharl16 to display video content. Go to: https://devforum.roblox.com/t/3093961 for more info")
+warn("(b.1.1) This Experience uses LuauMP4 by @sharl16 to display video content. Go to: https://github.com/sharl16/LuauMP4 for more info")
 
--- Function to pause the video
-function LuauMP4.pause_png(sound, imageLabelFolder)
-	if sound then
-		sound:Stop()
-	end
-	isFinished = true
-end
-
--- Function to stop the video
-function LuauMP4.stop_png(sound, imageLabelFolder, removeOnFinish)
-	if sound then
-		sound:Stop()
-	end
-	isFinished = true
-	-- We hide all the image labels, otherwise we would have just paused the video. If you want to pause the video you should use LuauMP4.pause_png()
-	if removeOnFinish then
-		for _, obj in pairs(imageLabelFolder:GetChildren()) do
-			if obj:IsA("ImageLabel") then
-				obj.Visible = false
-			end
+local function getImageLabelForPreloading(imageCanvas)
+	local preloadLabels = {}
+	for i = 1, 30 do
+		local label = imageCanvas:FindFirstChild(tostring(i))
+		if label then
+			label.Visible = false 
+			table.insert(preloadLabels, label)
 		end
 	end
+	return preloadLabels
 end
 
--- Function to play the video 
-function LuauMP4.playback_png(imageLabelFolder, imageSize, imagePosition, FrameRate, loop, removeOnFinish, useTitleBar, sound)
-	isFinished = false
-
-	-- Check if the folder exists and if it has images
-	if not imageLabelFolder then
-		warn("ImageLabelFolder not found.")
+local function preloadImageAsync(imageLabel, assetId)
+	imageLabel.Visible = true
+	local success, err = pcall(function()
+		imageLabel.Image = assetId
+	end)
+	if err then
 		return
 	end
+end
+
+function LuauMP4.playback_video(config, imageCanvas, FrameRate, imageSize, imagePosition, sound, loop, videoTitle, videoDuration, useLoadingScreen)
+	if not config or not imageCanvas or not FrameRate or not imageSize or not imagePosition then
+		warn("Missing 1 or more required arguments. The video cannot be played.")
+		return
+	end
+
+	isFinished = false
+
+	local configModule = require(config)
+	local AssetMap = configModule.AssetMap
+
+	local assetKeys = {}
+	for key in pairs(AssetMap) do
+		table.insert(assetKeys, key)
+	end
+
+	table.sort(assetKeys, function(a, b)
+		return tonumber(a) < tonumber(b)
+	end)
+
+	local totalAssets = #assetKeys
+	local preloadLabels = getImageLabelForPreloading(imageCanvas)
+	local currentImageLabel = imageCanvas.CurrentImageLabel
+
+	local function initialPreload()
+		if useLoadingScreen then
+			imageCanvas.Loading.Visible = true
+		end
+		for i = 1, math.min(30, totalAssets) do
+			preloadImageAsync(preloadLabels[i], AssetMap[tostring(i)])
+		end
+		imageCanvas.Loading.Visible = false
+		if sound then
+			sound:Play()
+		end
+	end
+
+	local function preloadNextImages(currentIndex)
+		for i = 1, 30 do
+			local assetIndex = currentIndex + i - 1
+			if assetIndex <= totalAssets then
+				preloadImageAsync(preloadLabels[i], AssetMap[tostring(assetIndex)])
+			end
+		end
+	end
+
+	currentImageLabel.Size = imageSize
+	currentImageLabel.Position = imagePosition
 	
-	-- Not yet implemented fully, this will introduce a timeline (scrubber bar) that will allow us to change the position of the video.
-	if useTitleBar then
-		warn("useTitleBar is not yet fully implemented! You shouldn't use this yet.")
-		local titlebar = player.PlayerGui.LoadingScreenBySH16.Resources.VideoUtils.titlebar:Clone()
-		titlebar.Parent = player.PlayerGui.LoadingScreenBySH16.Resources.VideoPNG
-		titlebar.Visible = true
-	end
-	
-	-- Check if we have a sound, if we have we will play it, if it is nil then we simply play the video with no sound.
-	if sound then
-		sound:Play()
-		if loop then 
-			sound.Looped = true
-		end
-	end
-
-	-- Function to make all Images visible
-	local function makeAllVisible()
-		for _, obj in pairs(imageLabelFolder:GetChildren()) do -- We do a loop in the ImageLabelFolder to get all Images; The IsA Check is here because in the future a timeline will be introduced.
-			if obj:IsA("ImageLabel") then
-				obj.Size = imageSize
-				obj.Position = imagePosition
-				obj.Visible = true
-			end
-		end
-	end
-
-	-- Function to make all Images invisible
-	local function makeAllInvisible()
-		for _, obj in pairs(imageLabelFolder:GetChildren()) do
-			if obj:IsA("ImageLabel") then
-				obj.Visible = false
-			end
-		end
-	end
-
-	-- Retrieve and sort all Images based on their name
-	local function getSortedImageLabels()
-		local imageLabels = {}
-		for _, obj in pairs(imageLabelFolder:GetChildren()) do
-			if obj:IsA("ImageLabel") then
-				table.insert(imageLabels, obj)
-			end
-		end
-		-- Sort images based on their name
-		table.sort(imageLabels, function(a, b)
-			return tonumber(a.Name) < tonumber(b.Name)
-		end)
-		return imageLabels
-	end
-
-	-- Retrieve all Images and sort them
-	local imageLabels = getSortedImageLabels()
 	local currentIndex = 1
-	local delayTime = FrameRate -- 1 / 30 is approx. 30 FPS. 1 / 60 is 60 and so on.
-	-- Preload images by making them all visible
-	makeAllVisible()
-	wait(2.5)
-	makeAllInvisible()
 
-	-- Function to display the next image (this is the main function that we will loop until the video finishes playing)
-	local function displayNextImage()
-		if #imageLabels == 0 then
-			warn("No ImageLabels found.")
-			return
-		end
-		makeAllInvisible()
-		-- Show the current image
-		local currentImageLabel = imageLabels[currentIndex]
-		currentImageLabel.Visible = true
-		-- Move to the next image
-		if currentIndex == #imageLabels and not loop then
-			LuauMP4.stop_png(sound, imageLabelFolder, removeOnFinish)
-			return true
-		else
-			currentIndex = currentIndex % #imageLabels + 1
-			return false
-		end	
+	for i = 1,5 do
+		initialPreload()
+		wait()
 	end
-	-- Main loop, I don't approve this a lot but I can't think of something else..
+
 	while not isFinished do
-		displayNextImage()
-		wait(delayTime)
+		currentImageLabel.Image = AssetMap[assetKeys[currentIndex]]
+		currentIndex = currentIndex + 1
+
+		if currentIndex > totalAssets then
+			if not loop then
+				isFinished = true
+				if sound then
+					sound:Stop()
+				end
+				return
+			end
+			currentIndex = 1
+		end
+		preloadNextImages(currentIndex)
+		wait(FrameRate)
 	end
 end
 

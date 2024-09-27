@@ -103,8 +103,16 @@ function MainMdl.GetVideoModule()
 	deploymentFolder.Parent = game.Workspace
 end
 
+function MainMdl.GetStableVideoModule()
+	local vidModule = script.Stable.LuauMP4:Clone()
+	local deploymentFolder = Instance.new("Folder")
+	deploymentFolder.Name = "Inserted Assets"
+	vidModule.Parent = deploymentFolder
+	deploymentFolder.Parent = game.Workspace
+end
+
 function MainMdl.CheckForUpdates(baseWidget)
-	local currentVersion = "Plugin Version: b1.1"
+	local currentVersion = "Plugin Version: b1.2.1"
 	local pluginAssetId = 18735535757
 	local success, result = pcall(function()
 		return MarketplaceService:GetProductInfo(pluginAssetId, Enum.InfoType.Asset)

@@ -1,35 +1,10 @@
---[[
-
-==================
-LuauMP4 // Version b1.1
-by @sharl16
-==================
-
-!!!COMPLETE REWRITE!!! 
-
-The previous versions had some weird code due to
-using GPT for some stuff (Like removing the video
-at the end and ect. ) This caused more problems
-when trying to debug and I had to rewrite it all 
-completely without GPT (Obviously, the approach is the same,
-so it is similar, it just doesn't have weird artifacts from GPT.)
-
-This is the main module for playing back videos from ImageLabels. 
-It is not recommended to touch anything in here unless you know 
-what you are doing, you can modify whatever you want without
-modifying this code directly. Updates will come.
-
-**IF YOU HAVE A BETTER NAME, PLEASE TELL ME**
-
-]]
-
 local LuauMP4 = {}
 
 local Players = game:GetService("Players")
 local plr = Players.LocalPlayer
 local isFinished = false
 
-warn("(b.1.1) This Experience uses LuauMP4 by @sharl16 to display video content. Go to: https://github.com/sharl16/LuauMP4 for more info")
+warn("(b.1.2.1) This Experience uses LuauMP4 by @sharl16 to display video content. Go to: https://github.com/sharl16/LuauMP4 for more info")
 
 local function getImageLabelForPreloading(imageCanvas)
 	local preloadLabels = {}
@@ -50,6 +25,11 @@ local function preloadImageAsync(imageLabel, assetId)
 	end)
 	if err then
 		return
+	end
+
+	-- Wait until the image is loaded before proceeding
+	while not imageLabel:IsLoaded() do
+		wait(0.05)  -- Small wait to avoid blocking
 	end
 end
 
@@ -95,22 +75,25 @@ function LuauMP4.playback_video(config, imageCanvas, FrameRate, imageSize, image
 			local assetIndex = currentIndex + i - 1
 			if assetIndex <= totalAssets then
 				preloadImageAsync(preloadLabels[i], AssetMap[tostring(assetIndex)])
+			else
+				preloadLabels[i].Visible = false -- Hide label if no more assets to preload
 			end
 		end
 	end
 
 	currentImageLabel.Size = imageSize
 	currentImageLabel.Position = imagePosition
-	
-	local currentIndex = 1
 
-	for i = 1,5 do
-		initialPreload()
-		wait()
-	end
+	local currentIndex = 1
+	initialPreload()
 
 	while not isFinished do
+		-- Show the current image in the CurrentImageLabel
 		currentImageLabel.Image = AssetMap[assetKeys[currentIndex]]
+
+		-- Preload the next batch of images for the preload labels
+		preloadNextImages(currentIndex + 1)
+
 		currentIndex = currentIndex + 1
 
 		if currentIndex > totalAssets then
@@ -123,7 +106,7 @@ function LuauMP4.playback_video(config, imageCanvas, FrameRate, imageSize, image
 			end
 			currentIndex = 1
 		end
-		preloadNextImages(currentIndex)
+
 		wait(FrameRate)
 	end
 end

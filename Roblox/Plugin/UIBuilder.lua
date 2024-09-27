@@ -52,10 +52,35 @@ ui.Guide.Guide1.done.MouseButton1Down:Connect(function()
 end)
 
 ui.Guide.Guide1.getModule.MouseButton1Down:Connect(function()
-	MainMdl.GetVideoModule()
-	ui.Guide.Guide1.getModuleText.Text = "Not here? Try again"
+	ui.Choose.Visible = true
 end)
 
-ui.Changelog.done.MouseButton1Down:Connect(function()
-	ui.Changelog.Visible = false
+ui.Choose.Frame.getLatestModule.MouseButton1Down:Connect(function()
+	MainMdl.GetVideoModule()
+	wait(1.5)
+	local module = game.Workspace:FindFirstChild("Inserted Assets")
+	if module then
+		ui.Choose.Frame.Visible = false
+		ui.Choose.Success.Visible = true
+	end
+end)
+
+ui.Choose.Frame.getStableModule.MouseButton1Down:Connect(function()
+	MainMdl.GetStableVideoModule()
+	local module = game.Workspace:FindFirstChild("Inserted Assets")
+	wait(1.5)
+	if module then
+		ui.Choose.Frame.Visible = false
+		ui.Choose.Success.Visible = true
+	end
+end)
+
+ui.Choose.done.MouseButton1Down:Connect(function()
+	ui.Choose.Visible = false
+end)
+
+ui.Choose.Success.Close.MouseButton1Down:Connect(function()
+	ui.Choose.Frame.Visible = true
+	ui.Choose.Success.Visible = false
+	ui.Choose.Visible = false
 end)

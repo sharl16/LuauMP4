@@ -9,4 +9,4 @@ A simple python script that slices .mp4 footage in .png files.
 - Make a "algorithm" in which Python detects duplicate or similar frames, combines them all in one and then via a config file it tells Lua to wait a set amount of time when on that frame. This will drastically decrease the image count and the size.
 - Find a way to "stream" images rather than uploading massive amounts of images in Roblox manually.
 - Implement "Lazy Loading" when playing back images.
-- Instead of having hunderds of separate images stored in the game, we will have only one and with a config script it's rbxassetid will be changed. This will significantly reduce the memory usage.
+- Instead of having hunderds of separate images stored in the game, we will have only one and with a config script it's rbxassetid will be changed. This will significantly reduce the memory usage. ( DONE! Use latest to use this feature, there might be slight issues however .)

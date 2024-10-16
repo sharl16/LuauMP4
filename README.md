@@ -15,4 +15,4 @@ A ROBLOX Plugin that allows you to playback videos for free by splitting up JPG'
 - Instead of having hunderds of separate images stored in the game, we will have only one and with a config script it's rbxassetid will be changed. This will significantly reduce the memory usage. ( DONE! Use latest to use this feature, there might be slight issues however .)
 
 ## Disclaimer:
-- All good things eventually end. Well my time has come, I no longer work in ROBLOX related issues. This repository is no longer maintained, unless ROBLOX breaks compatibility with the plugin. Thanks for the support.
+- All good things come to an end. Well my time has come, I no longer work in ROBLOX related issues. This repository is no longer maintained, unless ROBLOX breaks compatibility with the plugin. Thanks for the support.

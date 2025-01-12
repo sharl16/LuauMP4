@@ -2,7 +2,7 @@
 
 A ROBLOX Plugin that allows you to playback videos for free by splitting up JPG's or PNG's in many ImageLabels.
 
-- It comes in two variants, one with more stable playback but larger memory usage (Stable) and an experimental one with 90% improvement in performance but comes at the cost of stuttering playback (Latest)
+- It comes in two variants, one with more stable playback but larger memory usage (Stable) and an experimental one with ~85% improvement in performance but comes at the cost of stuttering playback (Latest)
 
 ---
 

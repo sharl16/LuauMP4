@@ -9,7 +9,7 @@ local widgetInfo = DockWidgetPluginGuiInfo.new(
 )
 
 -- Create the widget
-local baseWidget = plugin:CreateDockWidgetPluginGui("LuauMP4", widgetInfo)
+local baseWidget = plugin:CreateDockWidgetPluginGui("LuauMP4", widgetInfo) 
 baseWidget.Title = "LuauMP4 Builder"  
 
 local toolbar = plugin:CreateToolbar("LuauMP4")
@@ -23,23 +23,19 @@ local ui = script.Parent:FindFirstChild("VideoBuilderUI"):Clone()
 ui.Parent = baseWidget
 
 local MainMdl = require(script.Parent.MainMdl)
+local Theme = require(script.Parent.Theme)
 
 MainMdl.CheckForUpdates(baseWidget)
 
 toolbarBtn.Click:Connect(function()
+	ui.Guide.Guide2.Visible = false
+	ui.Guide.Guide1.Visible = true
 	baseWidget.Enabled = not baseWidget.Enabled
 	MainMdl.CheckForUpdates(baseWidget)
 end)
 
-baseWidget.Changed:Connect(function()
-	if baseWidget.Enabled then
-		ui.Guide.Guide2.Visible = false
-		ui.Guide.Guide1.Visible = true
-	end
-end)
-
-ui.guided.MouseButton1Down:Connect(function()
-	MainMdl.GuidedSetupInit(baseWidget)
+settings().Studio.ThemeChanged:Connect(function()
+	Theme.ApplyTheme(ui)
 end)
 
 ui.Guide.Guide2.Convert.MouseButton1Down:Connect(function()
@@ -57,7 +53,7 @@ end)
 
 ui.Choose.Frame.getLatestModule.MouseButton1Down:Connect(function()
 	MainMdl.GetVideoModule()
-	wait(1.5)
+	task.wait(1.5)
 	local module = game.Workspace:FindFirstChild("Inserted Assets")
 	if module then
 		ui.Choose.Frame.Visible = false
@@ -68,7 +64,7 @@ end)
 ui.Choose.Frame.getStableModule.MouseButton1Down:Connect(function()
 	MainMdl.GetStableVideoModule()
 	local module = game.Workspace:FindFirstChild("Inserted Assets")
-	wait(1.5)
+	task.wait(1.5)
 	if module then
 		ui.Choose.Frame.Visible = false
 		ui.Choose.Success.Visible = true
@@ -84,3 +80,5 @@ ui.Choose.Success.Close.MouseButton1Down:Connect(function()
 	ui.Choose.Success.Visible = false
 	ui.Choose.Visible = false
 end)
+
+Theme.ApplyTheme(ui)

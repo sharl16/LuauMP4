@@ -1,6 +1,6 @@
 # Creative Commons Attribution-NonCommercial 4.0 International License
 
-Copyright [2026] [@sharl16]
+Copyright [2024] [@sharl16]
 
 You are free to:
 
